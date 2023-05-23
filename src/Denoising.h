@@ -27,7 +27,7 @@ inline float Gaussian(float x, float sigma)
     return std::exp(-(x * x) / (2 * sigma * sigma));
 }
 
-inline float Luman(float r, float g, float b)
+inline float Luminance(float r, float g, float b)
 {
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
@@ -66,10 +66,10 @@ inline void normalize(float& a, float& b, float& c, bool bClamp = false)
 
 float KernelWeight[]{ 3.0f / 8,1.0f / 4,1.0f / 16 };
 
-inline float Weight(int32_t x, int32_t y, int32_t i, int32_t j, 
-    int32_t size_x, int32_t size_y, int32_t channel, 
-    float* color, float* normal,float* pos,
-    float& sumValue_r, float& sumValue_g, float& sumValue_b,int32_t weightIndex,
+inline float Weight(int32_t x, int32_t y, int32_t i, int32_t j,
+    int32_t size_x, int32_t size_y, int32_t channel,
+    float* color, float* normal, float* pos,
+    float& sumValue_r, float& sumValue_g, float& sumValue_b, int32_t weightIndex,
     bool bWithAll = false)
 {
     uint32_t index = 0;
@@ -90,8 +90,8 @@ inline float Weight(int32_t x, int32_t y, int32_t i, int32_t j,
     float r_xy = *(color + offset_xy), g_xy = *(color + offset_xy + 1), b_xy = *(color + offset_xy + 2);
     float r_ij = *(color + offset_ij), g_ij = *(color + offset_ij + 1), b_ij = *(color + offset_ij + 2);
 
-    float lum_xy = Luman(r_xy, g_xy, b_xy);
-    float lum_ij = Luman(r_ij, g_ij, b_ij);
+    float lum_xy = Luminance(r_xy, g_xy, b_xy);
+    float lum_ij = Luminance(r_ij, g_ij, b_ij);
 
     float n0_xy = *(normal + offset_xy), n1_xy = *(normal + offset_xy + 1), n2_xy = *(normal + offset_xy + 2);
     float n0_ij = *(normal + offset_ij), n1_ij = *(normal + offset_ij + 1), n2_ij = *(normal + offset_ij + 2);
@@ -201,9 +201,9 @@ void FilterImage(int32_t size_x, int32_t size_y, int32_t channel, float* source,
     }
 }
 
-void copyImage(int32_t size_x, int32_t size_y, int32_t channel, float* source, float* dest,float Scale = 1)
+void copyImage(int32_t size_x, int32_t size_y, int32_t channel, float* source, float* dest, float Scale = 1)
 {
-    for(int32_t i = 0; i < size_x; ++i)
+    for (int32_t i = 0; i < size_x; ++i)
         for (int32_t j = 0; j < size_y; ++j)
         {
             int32_t offset = (j * size_x + i) * channel;
@@ -278,7 +278,7 @@ void GetSelection(int32_t OffSet, int32_t SPPNum, int32_t MISPP,
     BlendPixel(3 * (9 * 2 + 0), 3 * (9 * 2 + 2), 3 * (9 * 2 + 3), 3 * (9 * 2 + SPPNum + 7), Selections);
     BlendPixel(3 * (9 * 2 + 1), 3 * (9 * 2 + 2), 3 * (9 * 2 + 3), 3 * (9 * 2 + SPPNum + 8), Selections);
 
-    BlendPixel(3 * (9 * 2 + 1), 3 * (9 * 2 + 2), 3 * (9 * 2 + 3), 3 * (9 * 2 + 4),3 * (9 * 2 + SPPNum + 9), Selections);
+    BlendPixel(3 * (9 * 2 + 1), 3 * (9 * 2 + 2), 3 * (9 * 2 + 3), 3 * (9 * 2 + 4), 3 * (9 * 2 + SPPNum + 9), Selections);
 }
 
 float LossSigma = std::sqrt(2.0f / M_PI_FLT);
@@ -292,7 +292,7 @@ float InitLoss(float* selections)
     {
         float Q_r = selections[i * 3], Q_g = selections[i * 3 + 1], Q_b = selections[i * 3 + 2];
         float I_r = selections[i * 3 + offset], I_g = selections[i * 3 + offset + 1], I_b = selections[i * 3 + 2 + offset];
-        
+
         //float Q_lum = Luman(Q_r, Q_g, Q_b);
         //float I_lum = Luman(I_r, I_g, I_b);
         float weight = Gaussian(1 - std::fabs(Q_r - I_r), 0.255) *
@@ -300,11 +300,11 @@ float InitLoss(float* selections)
             Gaussian(1 - std::fabs(Q_b - I_b), 0.255);
         loss += weight;
 
-        
+
         //loss = std::fabs(Q_lum - I_lum);
-        
+
         //std::cout << "loss " << loss << " " << Q_lum << " " << I_lum << std::endl;
-         
+
     }
     return loss * lossPdf;
 }
@@ -316,12 +316,12 @@ float LocalLoss(float* selections, int32_t SPP, float* result)
     float averageLum = 0.0;
     float I_lum = 0.0f;
 
-    averageLum = Luman(result[0], result[1], result[2]);
+    averageLum = Luminance(result[0], result[1], result[2]);
 
     float I_R = selections[offset + 4 * 3],
         I_G = selections[offset + 4 * 3 + 1],
         I_B = selections[offset + 4 * 3 + 2];
-    I_lum = Luman(I_R, I_G, I_B);
+    I_lum = Luminance(I_R, I_G, I_B);
 
     float avg_r = 0, avg_g = 0, avg_b = 0, avg_weight = 0;
     float gt_r = 0, gt_g = 0, gt_b = 0, gt_weight = 0;
@@ -332,7 +332,7 @@ float LocalLoss(float* selections, int32_t SPP, float* result)
         float Q_g = selections[LoosOffset + 1];
         float Q_b = selections[LoosOffset + 2];
 
-        float SelLum = Luman(Q_r, Q_g, Q_b);
+        float SelLum = Luminance(Q_r, Q_g, Q_b);
         float SelWeight = Gaussian(std::fabs(averageLum - SelLum), 0.255);
 
         avg_r += Q_r * SelWeight;
@@ -343,8 +343,8 @@ float LocalLoss(float* selections, int32_t SPP, float* result)
         float GTSelWeight = Gaussian(std::fabs(I_lum - SelLum), 0.7978);
         if (GTSelWeight < 0)
         {
-            std::cout << "lum" << I_lum << " " << SelLum << " " << Gaussian(std::fabs(I_lum - SelLum), 0.7978) << 
-                 " " << clamp(Gaussian(std::fabs(I_lum - SelLum), 0.7978), 0, 1) << std::endl;
+            std::cout << "lum" << I_lum << " " << SelLum << " " << Gaussian(std::fabs(I_lum - SelLum), 0.7978) <<
+                " " << clamp(Gaussian(std::fabs(I_lum - SelLum), 0.7978), 0, 1) << std::endl;
         }
         if (GTSelWeight > gt_weight)
         {
@@ -355,7 +355,7 @@ float LocalLoss(float* selections, int32_t SPP, float* result)
     avg_r /= avg_weight;
     avg_g /= avg_weight;
     avg_b /= avg_weight;
-    
+
     //gt_weight *= 2;
     result[0] = I_R * gt_weight + (1 - gt_weight) * avg_r;
     result[1] = I_G * gt_weight + (1 - gt_weight) * avg_g;
@@ -369,7 +369,7 @@ void globalLoss(float* selections, float* result)
 {
     int32_t offset = 9 * 3;
 
-    float resultLum = Luman(result[0], result[1], result[2]);
+    float resultLum = Luminance(result[0], result[1], result[2]);
 
     float weight = 0.0f;
     float r = 0.0, g = 0.0, b = 0.0;
@@ -382,8 +382,8 @@ void globalLoss(float* selections, float* result)
         float I_r = selections[i * 3 + offset], I_g = selections[i * 3 + offset + 1], I_b = selections[i * 3 + 2 + offset];
         float Q_r = selections[i * 3], Q_g = selections[i * 3 + 1], Q_b = selections[i * 3 + 2];
 
-        float lum = Luman(I_r, I_g, I_b);
-        float QLum = Luman(Q_r, Q_g, Q_b);
+        float lum = Luminance(I_r, I_g, I_b);
+        float QLum = Luminance(Q_r, Q_g, Q_b);
         float tmp_weight = Gaussian(std::fabs(QLum - lum), 0.255);
 
         r += Q_r * tmp_weight;
@@ -412,7 +412,7 @@ float GetLoss(float* selections, int32_t LossIndex)
     {
         //int32_t i = 4;
         float Q_r = selections[i * 3], Q_g = selections[i * 3 + 1], Q_b = selections[i * 3 + 2];
-        
+
         if (i == 4)
         {
             int32_t LoosOffset = 3 * 9 * 2 + LossIndex * 3;
@@ -457,7 +457,7 @@ inline void deNoising(int32_t size_x, int32_t size_y, int32_t channel, int32_t S
     uint8_t* surrogateImage = static_cast<uint8_t*>(allocAligned(SPPOffset));
 
     //FilterImage(size_x, size_y, channel, color, (float*)surrogateImage, normal, pos);
-    FilterImage(size_x, size_y, channel, color, (float*)surrogateImage, normal, pos,true);
+    FilterImage(size_x, size_y, channel, color, (float*)surrogateImage, normal, pos, true);
     //copyImage(size_x, size_y, channel, (float*)surrogateImage, color);
     //return;
 
@@ -466,7 +466,7 @@ inline void deNoising(int32_t size_x, int32_t size_y, int32_t channel, int32_t S
 
     uint8_t* Q = static_cast<uint8_t*>(allocAligned(SPPOffset));
     //use one layer to init Q
-    copyImage(size_x, size_y,channel,(float*)(layerData), (float*)Q);
+    copyImage(size_x, size_y, channel, (float*)(layerData), (float*)Q);
     //copyImage(size_x, size_y, channel, (float*)layerData, color);
     //return;
 
@@ -493,7 +493,7 @@ inline void deNoising(int32_t size_x, int32_t size_y, int32_t channel, int32_t S
                         selections[0 + QIndex * 3] = *((float*)(Q)+QOffset);
                         selections[1 + QIndex * 3] = *((float*)(Q)+QOffset + 1);
                         selections[2 + QIndex * 3] = *((float*)(Q)+QOffset + 2);
-                        
+
                         selections[0 + QIndex * 3 + 9 * 3] = *((float*)(surrogateImage)+QOffset);
                         selections[1 + QIndex * 3 + 9 * 3] = *((float*)(surrogateImage)+QOffset + 1);
                         selections[2 + QIndex * 3 + 9 * 3] = *((float*)(surrogateImage)+QOffset + 2);
@@ -505,8 +505,8 @@ inline void deNoising(int32_t size_x, int32_t size_y, int32_t channel, int32_t S
                 //*((float*)(Q)+offset) = layer[offset];
                 //*((float*)(Q)+offset + 1) = layer[offset + 1];
                 //*((float*)(Q)+offset + 2) = layer[offset + 2];
-                
-                GetSelection(SPPOffset, SPP, 0, size_x, size_y, channel, i, j,layerData, selections);
+
+                GetSelection(SPPOffset, SPP, 0, size_x, size_y, channel, i, j, layerData, selections);
 
                 //std::cout << "GetSelection end" << std::endl;
 
@@ -538,7 +538,7 @@ inline void deNoising(int32_t size_x, int32_t size_y, int32_t channel, int32_t S
                 //        result[2] = selections[3 * 9 * 2 + LossIndex * 3 + 2];
                 //    }
                 //}
-                 
+
                 globalLoss(selections, result);
                 LocalLoss(selections, SPP, result);
 
