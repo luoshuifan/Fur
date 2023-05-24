@@ -25,7 +25,7 @@
 
 作为**InImage**，主要的输入有每个SPP采样的Albedo和渲染出来的Albedo以及法线，位置这些数据。
 
-其实整体框架或者思路来源于[Perceptual error optimization for Monte Carlo rendering](https://dl.acm.org/doi/10.1145/3504002)
+其实整体框架或者思路来源于[Perceptual error optimization for Monte Carlo rendering](https://sampling.mpi-inf.mpg.de/2022-chizhov-perception.html)
 
 核心思想就是利用每个SPP的采样值来进行估计滴。
 
