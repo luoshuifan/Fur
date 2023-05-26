@@ -12,6 +12,14 @@
 ![ALL](https://github.com/luoshuifan/Fur/assets/109076683/92f9f50c-7bce-4531-a513-a8f9d34c116b)
 > 32SPP 去噪之后的效果，可以看见还是有一些效果滴~
 
+其他降噪结果图
+![32](https://github.com/luoshuifan/Fur/assets/109076683/141f267d-68d6-4fb7-80ff-d787945c09ba)
+>32SPP
+
+![scene_v0](https://github.com/luoshuifan/Fur/assets/109076683/4e5214e2-5ac1-412e-80a1-c3180c68c063)
+>32SPP 可以看见能增加一些shadow，和细节上更加的平滑，其实细节的把控还是要调节GT步骤，GT越好，效果越好
+
+
 总之，在保留渲染细节的同时，能降低一些高频噪点所带来的影响，同时能一定程度上保留一些高光效果。自我满足了 ฅ՞•ﻌ•՞ ต
 
 吐槽一下，毛发这种细节怪，真的难搞，学识浅薄了，痛苦…………(っ◞‸◟c)…………
