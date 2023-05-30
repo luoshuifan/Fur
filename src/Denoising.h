@@ -41,6 +41,15 @@ inline int32_t clamp(int32_t x, int32_t a, int32_t b)
     return x;
 }
 
+inline float fclamp(float x, float a, float b)
+{
+    if (x < a)
+        x = a;
+    if (x > b)
+        x = b;
+    return x;
+}
+
 inline void normalize(float& a, float& b, float& c, bool bClamp = false)
 {
     if (std::isinf(a) || std::isnan(a) ||
@@ -56,9 +65,9 @@ inline void normalize(float& a, float& b, float& c, bool bClamp = false)
         c = c / len;
         if (bClamp)
         {
-            a = clamp(a, 0, 1);
-            b = clamp(b, 0, 1);
-            c = clamp(c, 0, 1);
+            a = fclamp(a, 0.0f, 1.0f);
+            b = fclamp(b, 0.0f, 1.0f);
+            c = fclamp(c, 0.0f, 1.0f);
         }
     }
 }
@@ -98,6 +107,7 @@ inline float Weight(int32_t x, int32_t y, int32_t i, int32_t j,
 
     float n0 = n0_xy - n0_ij, n1 = n1_xy - n1_ij, n2 = n2_xy - n2_ij;
     float cosvalue = n0 * n0 + n1 * n1 + n2 * n2;
+    //float cosvalue = n0_xy * n0_ij + n1_xy * n1_ij + n2_xy * n2_ij;
 
     //if(cosvalue != 0)
     //    std::cout << "cos " << cosvalue << " " << n0_xy << " " << n1_xy << " " <<  n2_xy
@@ -110,14 +120,17 @@ inline float Weight(int32_t x, int32_t y, int32_t i, int32_t j,
     float dotPos = posx * posx + posy * posy + posz * posz;
 
     float sigma = 0.797884560803;
+    //float weight = Gaussian(std::fabs(lum_xy - lum_ij), 0.6);
     float weight = Gaussian(std::fabs(lum_xy - lum_ij), 0.6);
     //weight = 1;
     if (bWithAll)
     {
         //weight *= Gaussian(std::fabs(cosvalue), 0.3) *
         //    Gaussian(std::fabs(dotPos), 0.3);
-        weight *= Gaussian(std::fabs(cosvalue), 0.255) *
-            Gaussian(std::fabs(dotPos), 0.255);
+        weight *=
+            Gaussian(std::fabs(cosvalue), 0.2) *
+            Gaussian(std::fabs(dotPos), 0.2) * 
+            KernelWeight[weightIndex];
     }
 
     sumValue_r += weight * r_ij;
@@ -215,9 +228,18 @@ void copyImage(int32_t size_x, int32_t size_y, int32_t channel, float* source, f
         for (int32_t j = 0; j < size_y; ++j)
         {
             int32_t offset = (j * size_x + i) * channel;
-            *(dest + offset) = (*(source + offset)) * Scale;
-            *(dest + offset + 1) = (*(source + offset + 1)) * Scale;
-            *(dest + offset + 2) = (*(source + offset + 2)) * Scale;
+            float x = (*(source + offset)) * Scale,
+                y = (*(source + offset + 1)) * Scale,
+                z = (*(source + offset + 2)) * Scale;
+
+            //normalize(x, y, z, true);
+            //x = x * 0.5 + 0.5;
+            //y = y * 0.5 + 0.5;
+            //z = z * 0.5 + 0.5;
+
+            *(dest + offset) = x;
+            *(dest + offset + 1) = y;
+            *(dest + offset + 2) = z;
 
         }
 }
@@ -423,6 +445,10 @@ void globalLoss(float* selections, float* result)
     r /= weight;
     b /= weight;
     g /= weight;
+
+    result[0] = r;
+    result[1] = g;
+    result[2] = b;
 }
 
 float GetLoss(float* selections, int32_t LossIndex)
