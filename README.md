@@ -9,7 +9,7 @@
 ![32](https://github.com/luoshuifan/Fur/assets/109076683/513750c9-464c-4998-a9b2-ab05993814a5)
 > 32SPP的带着噪点的渲染结果
 
-![ALL](https://github.com/luoshuifan/Fur/assets/109076683/92f9f50c-7bce-4531-a513-a8f9d34c116b)
+![new](https://github.com/luoshuifan/Fur/assets/109076683/08287c37-7204-4a6d-b102-dd8b4e92b188)
 > 32SPP 去噪之后的效果，可以看见还是有一些效果滴~
 
 其他降噪结果图
@@ -17,7 +17,13 @@
 >32SPP
 
 ![scene_v0](https://github.com/luoshuifan/Fur/assets/109076683/4e5214e2-5ac1-412e-80a1-c3180c68c063)
->32SPP 可以看见能增加一些shadow，和细节上更加的平滑，其实细节的把控还是要调节GT步骤，GT越好，效果越好
+>32SPP 可以看见能增加一些shadow，和细节上更加的平滑，其实细节的把控还是要调节参数
+
+![4](https://github.com/luoshuifan/Fur/assets/109076683/450c895e-1fa5-43fa-a766-7a72b86537e8)
+>cornellbox 4spp
+
+![scene_v0](https://github.com/luoshuifan/Fur/assets/109076683/54c25bf9-74bf-49b0-936a-d73c755b4726)
+>主要还是GT的步骤比重多，对于低频噪声而言
 
 
 总之，在保留渲染细节的同时，能降低一些高频噪点所带来的影响，同时能一定程度上保留一些高光效果。自我满足了 ฅ՞•ﻌ•՞ ต
